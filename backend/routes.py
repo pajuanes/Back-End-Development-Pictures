@@ -69,6 +69,8 @@ def create_picture():
         if not request.get_json():
             return {"message": "Content-Type must be application/json"}, 415
         picture = request.get_json()
+        if "id" not in picture:  
+            return {"message": "Missing required field: id"}, 400
         new_picture = next((item for item in data if item["id"] == picture["id"]), None)
         if new_picture is not None:
             return {"Message": f"picture with id {new_picture['id']} already present"}, 302
@@ -76,7 +78,7 @@ def create_picture():
             data.append(picture)
             return jsonify(picture), 201
         except Exception as e:
-            return {"message": f"Error to add new picture with id {new_picture['id']}"}, 500
+            return {"message": f"Error to add new picture with id {picture['id']}"}, 500
 
 
 ######################################################################
