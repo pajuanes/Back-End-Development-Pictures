@@ -35,7 +35,11 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    if data is None:
+        return {"message": "Data from pictures are empty"}, 200
+    else:
+        return jsonify(data), 200
+
 
 ######################################################################
 # GET A PICTURE
@@ -44,7 +48,14 @@ def get_pictures():
 
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
+    if data is None:
+        return {"message": "Data from pictures are empty"}, 200
+    else:
+        picture = next((item for item in data if item["id"] == id), None)
+        if picture is not None:
+            return jsonify(picture), 200
+        else:
+            return {"message": f"picture with id {id} not found"}, 404
 
 
 ######################################################################
@@ -52,7 +63,23 @@ def get_picture_by_id(id):
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    if data is None:
+        return {"message": "Data from pictures are empty"}, 200
+    else:
+        if not request.get_json():
+            return {"message": "Content-Type must be application/json"}, 415
+        picture = request.get_json()
+        if "id" not in picture:  
+            return {"message": "Missing required field: id"}, 400
+        new_picture = next((item for item in data if item["id"] == picture["id"]), None)
+        if new_picture is not None:
+            return {"Message": f"picture with id {new_picture['id']} already present"}, 302
+        try:
+            data.append(picture)
+            return jsonify(picture), 201
+        except Exception as e:
+            return {"message": f"Error to add new picture with id {picture['id']}"}, 500
+
 
 ######################################################################
 # UPDATE A PICTURE
@@ -61,11 +88,28 @@ def create_picture():
 
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    if data is None:
+        return {"message": "Data from pictures are empty"}, 200
+    else:
+        picture = next((item for item in data if item["id"] == id), None)
+        if picture is not None:
+            updated_picture = request.json
+            picture.update(updated_picture)
+            return jsonify(picture), 200
+        else:
+            return {"message": f"picture with id {id} not found"}, 404
+
 
 ######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    if data is None:
+        return {"message": "Data from pictures are empty"}, 200
+    else:
+        picture = next((item for item in data if item["id"] == id), None)
+        if picture is not None:
+            data.remove(picture)
+            return jsonify({"message": f"picture with id {id} deleted"}), 204
+        return {"message": f"picture with id {id} not found"}, 404

@@ -83,5 +83,3 @@ def test_delete_picture_by_id(client):
     res = client.delete("/picture/100")
     assert res.status_code == 404
 
-
-
