@@ -83,7 +83,7 @@ else {
 
     Write-Host ""
 
-    $selection = Read-Host "Selecciona el número del proyecto"
+    $selection = Read-Host "Selecciona el numero del proyecto"
 
     $selectionNumber = 0
 
@@ -160,7 +160,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 Write-Host "Acceso temporal configurado correctamente."
-Write-Host "La IP actual estará autorizada durante $Hours horas."
+Write-Host "La IP actual estara autorizada durante $Hours horas."
 Write-Host ""
 Write-Host "Access List actual:"
 Write-Host ""

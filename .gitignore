@@ -113,3 +113,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# mypy
+atlas-credentials.env
+certs/

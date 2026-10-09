@@ -368,6 +368,54 @@ Una conexión correcta mostrará:
 TcpTestSucceeded : True
 ```
 
+### Diagnóstico DNS, TCP y TLS desde Python
+
+Para comprobar los tres nodos del clúster con ambos intérpretes, ejecutar el siguiente bloque desde la raíz del proyecto en PowerShell. El script informa de la versión de Python y OpenSSL, las direcciones DNS, el destino TCP y el resultado de la negociación TLS.
+
+```powershell
+$testTls = @'
+import socket
+import ssl
+import sys
+from datetime import datetime, timezone
+
+print("Fecha:", datetime.now(timezone.utc).isoformat())
+print("Python:", sys.executable)
+print("Version:", sys.version)
+print("OpenSSL:", ssl.OPENSSL_VERSION)
+
+for n in range(3):
+    host = f"ac-mhhtd13-shard-00-0{n}.0smgbun.mongodb.net"
+    print("\nServidor:", host)
+
+    try:
+        addresses = sorted({
+            entry[4][0]
+            for entry in socket.getaddrinfo(
+                host, 27017, type=socket.SOCK_STREAM
+            )
+        })
+        print("DNS:", addresses)
+
+        context = ssl.create_default_context()
+        with socket.create_connection((host, 27017), timeout=10) as sock:
+            print("Destino TCP:", sock.getpeername())
+            with context.wrap_socket(sock, server_hostname=host) as tls:
+                print("TLS OK:", tls.version())
+                print("Cifrado:", tls.cipher())
+    except Exception as error:
+        print("ERROR:", type(error).__name__, str(error))
+'@
+
+Write-Host "`n=== PYTHON GLOBAL ==="
+$testTls | & "C:\Users\pajua\AppData\Local\Programs\Python\Python313\python.exe" -
+
+Write-Host "`n=== PYTHON DEL ENTORNO VIRTUAL ==="
+$testTls | & ".\.venv\Scripts\python.exe" -
+```
+
+En cada nodo, `TLS OK` confirma que Python pudo resolver el nombre, abrir la conexión TCP y negociar TLS con validación de certificado. Si una prueba falla, comparar sus resultados entre los dos intérpretes para acotar si el problema afecta a la red o a la configuración de Python/OpenSSL. Los nombres de nodo y la ruta del Python global del ejemplo corresponden al entorno configurado; sustituirlos si cambia el clúster o la instalación de Python.
+
 Si `mongosh` funciona sin VPN pero falla al pasar directamente por Surfshark, comprobar que `mongosh.exe`, `atlas.exe` y el `python.exe` del entorno virtual siguen configurados correctamente en Bypasser.
 
 ---
